@@ -40,10 +40,12 @@
    (m-buffer-match :regexp (rx upper digit)
                    :buffer (current-buffer))))
 
+;;;###autoload
 (defun hea-fellow-all-dimensions()
   (interactive)
   (message "Dimensions: %s" (sort (hea-fellow-get-all-dimensions) 'string<)))
 
+;;;###autoload
 (defun hea-fellow-missing()
   (interactive)
   (message "Missing Dimensions: %s"
@@ -59,6 +61,7 @@
              )
             #'string=)))
 
+;;;###autoload
 (defun hea-fellow-chart ()
   (interactive)
   (let* ((grouped-dimensions
@@ -72,7 +75,7 @@
            grouped-dimensions)))
     (chart-bar-quickie
      'vertical "HEA Dimensions"
-     (seq-map 'firstq counted-dimensions) "Dimension"
+     (seq-map 'first counted-dimensions) "Dimension"
      (seq-map 'second counted-dimensions) "Occurences")))
 
 (provide 'hea-fellow)
