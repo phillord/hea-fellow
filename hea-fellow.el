@@ -56,7 +56,7 @@
 
 (defun hea-fellow-get-all-dimensions()
   (m-buffer-match-string-no-properties
-   (m-buffer-match :regexp (rx upper digit)
+   (m-buffer-match :regexp (rx (or "A" "K" "V") (or "1" "2" "3" "4" "5"))
                    :buffer (current-buffer))))
 
 ;;;###autoload
