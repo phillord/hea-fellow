@@ -35,6 +35,25 @@
 (require 'chart)
 (require 'm-buffer)
 
+(defvar hea-fellow-dimensions
+  '(("V1" "respect individual learners and diverse groups of learners")
+    ("V2" "promote engagement in learning and equity of opportunity for all to reach their potential")
+    ("V3" "use scholarship, or research, or professional learning, or other evidence-informed approaches as a basis for effective practice")
+    ("V4" "respond to the wider context in which higher education operates, recognising implications for practice")
+    ("V5" "collaborate with others to enhance practice")
+
+    ("K1" "how learners learn, generally and within specific subjects")
+    ("K2" "approaches to teaching and/or supporting learning, appropriate for subjects and level of study")
+    ("K3" "critical evaluation as a basis for effective practice")
+    ("K4" "appropriate use of digital and/or other technologies, and resources for learning")
+    ("K5" "requirements for quality assurance and enhancement, and their implications for practice")
+
+    ("A1" "design and plan learning activities and/or programmes")
+    ("A2" "teach and/or support learning through appropriate approaches and environments")
+    ("A3" "assess and give feedback for learning")
+    ("A4" "support and guide learners")
+    ("A5" "enhance practice through own continuing professional development")))
+
 (defun hea-fellow-get-all-dimensions()
   (m-buffer-match-string-no-properties
    (m-buffer-match :regexp (rx upper digit)
@@ -77,6 +96,16 @@
      'vertical "HEA Dimensions"
      (seq-map 'first counted-dimensions) "Dimension"
      (seq-map 'second counted-dimensions) "Occurences")))
+
+;;;###autoload
+(defun hea-fellow-list ()
+  (interactive)
+  (with-output-to-temp-buffer
+      "HEA Fellow Dimensions"
+    (seq-do
+     (lambda (l)
+       (princ (format "%s\t%s\n" (first l) (second l))))
+     hea-fellow-dimensions)))
 
 (provide 'hea-fellow)
 ;;; End:
