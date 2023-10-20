@@ -83,19 +83,27 @@
 ;;;###autoload
 (defun hea-fellow-chart ()
   (interactive)
-  (let* ((grouped-dimensions
-          (sort (seq-group-by 'identity (hea-fellow-get-all-dimensions))
-                (lambda (x y) (string< (car x) (car y)))))
-         (counted-dimensions
-          (seq-map
-           (lambda (l)
-             (list (car l)
-                   (- (length l) 1)))
-           grouped-dimensions)))
-    (chart-bar-quickie
-     'vertical "HEA Dimensions"
-     (seq-map 'first counted-dimensions) "Dimension"
-     (seq-map 'second counted-dimensions) "Occurences")))
+  (save-excursion
+    (let* ((grouped-dimensions
+            (sort (seq-group-by 'identity (hea-fellow-get-all-dimensions))
+                  (lambda (x y) (string< (car x) (car y)))))
+           (counted-dimensions
+            (seq-map
+             (lambda (l)
+               (list (car l)
+                     (- (length l) 1)))
+             grouped-dimensions)))
+      (chart-bar-quickie
+       'vertical "HEA Dimensions"
+       (seq-map 'first counted-dimensions) "Dimension"
+       (seq-map 'second counted-dimensions) "Occurences"))))
+
+;;;###autoload
+(defun hea-fellow-chart-no-switch ()
+  "Display a chart but do not switch buffer to it"
+  (interactive)
+  (save-window-excursion
+    (hea-fellow-chart)))
 
 ;;;###autoload
 (defun hea-fellow-list ()
@@ -106,6 +114,27 @@
      (lambda (l)
        (princ (format "%s\t%s\n" (first l) (second l))))
      hea-fellow-dimensions)))
+
+
+(defun hea-fellow-chart-in-buffer (buffer)
+  (with-current-buffer buffer
+    (hea-fellow-chart-no-switch)))
+
+(defvar hea-fellow-idle-timer nil)
+(defun hea-fellow-chart-on-idle ()
+  "Update the HEA fellow char on idle."
+  (interactive)
+  (when hea-fellow-idle-timer
+    (cancel-timer hea-fellow-idle-timer))
+  ;; It's a bit flicky and distruptive
+  (setq hea-fellow-idle-timer
+        (run-with-idle-timer 4 t #'hea-fellow-chart-in-buffer (current-buffer))))
+
+(defun hea-fellow-chart-off-idle ()
+  (interactive)
+  (when hea-fellow-idle-timer
+    (cancel-timer hea-fellow-idle-timer))
+  (setq hea-fellow-idle-timer nil))
 
 (provide 'hea-fellow)
 ;;; End:
