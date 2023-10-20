@@ -64,39 +64,52 @@
   (interactive)
   (message "Dimensions: %s" (sort (hea-fellow-get-all-dimensions) 'string<)))
 
+(defun hea-fellow-missing ()
+  (seq-difference
+   '("A1" "A2" "A3" "A4" "A5"
+     "K1" "K2" "K3" "K4" "K5"
+     "V1" "V2" "V3" "V4" "V5")
+   (seq-uniq
+    (sort
+     (hea-fellow-get-all-dimensions)
+     #'string<)
+    #'string=)
+   #'string=))
+
 ;;;###autoload
-(defun hea-fellow-missing()
+(defun hea-fellow-show-missing()
   (interactive)
   (message "Missing Dimensions: %s"
-           (seq-difference
-            '("A1" "A2" "A3" "A4" "A5"
-              "K1" "K2" "K3" "K4" "K5"
-              "V1" "V2" "V3" "V4" "V5")
-            (seq-uniq
-             (sort
-              (hea-fellow-get-all-dimensions)
-              #'string<)
-             #'string=
-             )
-            #'string=)))
+           (hea-fellow-missing)))
 
 ;;;###autoload
 (defun hea-fellow-chart ()
   (interactive)
   (save-excursion
-    (let* ((grouped-dimensions
-            (sort (seq-group-by 'identity (hea-fellow-get-all-dimensions))
-                  (lambda (x y) (string< (car x) (car y)))))
+    (let* (
+           ;; Group them
+           (grouped-dimensions
+            (seq-group-by 'identity (hea-fellow-get-all-dimensions)))
+           ;; Count the groups
            (counted-dimensions
             (seq-map
              (lambda (l)
                (list (car l)
                      (- (length l) 1)))
-             grouped-dimensions)))
+             grouped-dimensions))
+           ;; Add in the missing and sort
+           (counted-with-missing-dimensions
+            (sort
+             (seq-union counted-dimensions
+                        (seq-map
+                         (lambda (dimension)
+                           `(,dimension 0))
+                         (hea-fellow-missing)))
+             (lambda (x y) (string< (car x) (car y))))))
       (chart-bar-quickie
        'vertical "HEA Dimensions"
-       (seq-map 'first counted-dimensions) "Dimension"
-       (seq-map 'second counted-dimensions) "Occurences"))))
+       (seq-map 'first counted-with-missing-dimensions) "Dimension"
+       (seq-map 'second counted-with-missing-dimensions) "Occurences"))))
 
 ;;;###autoload
 (defun hea-fellow-chart-no-switch ()
