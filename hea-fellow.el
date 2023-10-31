@@ -54,9 +54,11 @@
     ("A4" "support and guide learners")
     ("A5" "enhance practice through own continuing professional development")))
 
+(defvar hea-fellow-citation-regexp (rx (or "A" "K" "V") (or "1" "2" "3" "4" "5")))
+
 (defun hea-fellow-get-all-dimensions()
   (m-buffer-match-string-no-properties
-   (m-buffer-match :regexp (rx (or "A" "K" "V") (or "1" "2" "3" "4" "5"))
+   (m-buffer-match :regexp hea-fellow-citation-regexp
                    :buffer (current-buffer))))
 
 ;;;###autoload
@@ -148,6 +150,21 @@
   (when hea-fellow-idle-timer
     (cancel-timer hea-fellow-idle-timer))
   (setq hea-fellow-idle-timer nil))
+
+(defun hea-fellow-show-dimension ()
+  (interactive)
+  (let ((wap (word-at-point)))
+    (when-let*
+        ((_ (stringp wap))
+         (_ (string-match-p
+             hea-fellow-citation-regexp
+             wap))
+         (item (assoc wap hea-fellow-dimensions))
+         (definition (second item)))
+      (message "%s: %s" wap definition))))
+
+(defvar hea-fellow-show-dimension-timer
+  (run-with-idle-timer 1 t #'hea-fellow-show-dimension))
 
 (provide 'hea-fellow)
 ;;; End:
