@@ -50,7 +50,6 @@
     ("K4" "The use and value of appropriate learning technologies")
     ("K5" "Methods for evaluating the effectiveness of teaching")
     ("K6" "The implications of quality assurance and quality enhancement for academic and professional practice with a particular focus on teaching")
-    
 
     ("A1" "Design and plan learning activities and/or programmes of study")
     ("A2" "Teach and/or support learning")
@@ -105,11 +104,16 @@ This is my own mapping and is not official. It is based on word usage."
     (nil "V5")))
 
 
-(defvar hea-fellow-citation-regexp (rx (or "A" "K" "V") (or "1" "2" "3" "4" "5")))
+(defun hea-fellow-citation-regexp ()
+  (cl-case hea-fellow-dimension
+    (:2011
+     (rx (or "K5" "K6" "A5"  (group (or "A" "K" "V" ) (or "1" "2" "3" "4")))))
+    (:2023
+     (rx (or "A" "K" "V") (or "1" "2" "3" "4" "5")))))
 
 (defun hea-fellow-get-all-dimensions()
   (m-buffer-match-string-no-properties
-   (m-buffer-match :regexp hea-fellow-citation-regexp
+   (m-buffer-match :regexp (hea-fellow-citation-regexp)
                    :buffer (current-buffer))))
 
 ;;;###autoload
@@ -119,9 +123,15 @@ This is my own mapping and is not official. It is based on word usage."
 
 (defun hea-fellow-missing ()
   (seq-difference
-   '("A1" "A2" "A3" "A4" "A5"
-     "K1" "K2" "K3" "K4" "K5"
-     "V1" "V2" "V3" "V4" "V5")
+   (cl-case hea-fellow-dimension
+     (:2011
+      '("A1" "A2" "A3" "A4" "A5"
+        "K1" "K2" "K3" "K4" "K5" "K6"
+        "V1" "V2" "V3" "V4"))
+     (:2023
+      '("A1" "A2" "A3" "A4" "A5"
+        "K1" "K2" "K3" "K4" "K5"
+        "V1" "V2" "V3" "V4" "V5")))
    (seq-uniq
     (sort
      (hea-fellow-get-all-dimensions)
@@ -179,7 +189,9 @@ This is my own mapping and is not official. It is based on word usage."
     (seq-do
      (lambda (l)
        (princ (format "%s\t%s\n" (first l) (second l))))
-     hea-fellow-dimensions)))
+     (cl-case hea-fellow-dimension
+       (:2011 hea-fellow-dimensions-2011)
+       (:2023 hea-fellow-dimensions-2023)))))
 
 
 (defun hea-fellow-chart-in-buffer (buffer)
@@ -208,13 +220,12 @@ This is my own mapping and is not official. It is based on word usage."
     (when-let*
         ((_ (stringp wap))
          (_ (string-match-p
-             hea-fellow-citation-regexp
+             (hea-fellow-citation-regexp)
              wap))
          (item (assoc wap
                       (cl-case hea-fellow-dimension
                         (:2011 hea-fellow-dimensions-2011)
-                        (:2023 hea-fellow-dimensions-2023))
-                      hea-fellow-dimensions))
+                        (:2023 hea-fellow-dimensions-2023))))
          (definition (second item)))
       (message "%s: %s" wap definition))))
 
