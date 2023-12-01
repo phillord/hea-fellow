@@ -35,7 +35,33 @@
 (require 'chart)
 (require 'm-buffer)
 
-(defvar hea-fellow-dimensions
+(defvar hea-fellow-dimension :2023)
+
+(defvar hea-fellow-dimensions-2011
+  '(
+    ("V1" "Respect individual learners and diverse learning communities")
+    ("V2" "Promote participation in higher education and equality of opportunity for learners")
+    ("V3" "Use evidence-informed approaches and the outcomes from research, scholarship and continuing professional development")
+    ("V4" "Acknowledge the wider context in which higher education operates recognising the implications for professional practice")
+
+    ("K1" "The subject material")
+    ("K2" "Appropriate methods for teaching, learning and assessing in the subject area and at the level of the academic programme")
+    ("K3" "How students learn, both generally and within their subject/disciplinary area(s)")
+    ("K4" "The use and value of appropriate learning technologies")
+    ("K5" "Methods for evaluating the effectiveness of teaching")
+    ("K6" "The implications of quality assurance and quality enhancement for academic and professional practice with a particular focus on teaching")
+    
+
+    ("A1" "Design and plan learning activities and/or programmes of study")
+    ("A2" "Teach and/or support learning")
+    ("A3" "Assess and give feedback to learners")
+    ("A4" "Develop effective learning environments and approaches to student support and guidance")
+    ("A5" "Engage in continuing professional development in subjects/disciplines and their pedagogy, incorporating research, scholarship and the evaluation of professional practices")
+    )
+
+  )
+
+(defvar hea-fellow-dimensions-2023
   '(("V1" "respect individual learners and diverse groups of learners")
     ("V2" "promote engagement in learning and equity of opportunity for all to reach their potential")
     ("V3" "use scholarship, or research, or professional learning, or other evidence-informed approaches as a basis for effective practice")
@@ -53,6 +79,31 @@
     ("A3" "assess and give feedback for learning")
     ("A4" "support and guide learners")
     ("A5" "enhance practice through own continuing professional development")))
+
+(defvar hea-fellow-2011-2023-mapping
+  "Mapping between 2011 and 2023 PSF.
+
+This is my own mapping and is not official. It is based on word usage."
+  '(
+    ("K1" nil)
+    ("K2" "K2")
+    ("K3" "K1")
+    ("K4" "K4")
+    ("K5" "K3")
+    ("K6" "K5")
+
+    ("A1" "A1")
+    ("A2" "A2")
+    ("A3" "A3")
+    ("A4" "A4")
+    ("A5" "A5")
+
+    ("V1" "V1")
+    ("V2" "V2")
+    ("V3" "V3")
+    ("V4" "V4")
+    (nil "V5")))
+
 
 (defvar hea-fellow-citation-regexp (rx (or "A" "K" "V") (or "1" "2" "3" "4" "5")))
 
@@ -159,7 +210,11 @@
          (_ (string-match-p
              hea-fellow-citation-regexp
              wap))
-         (item (assoc wap hea-fellow-dimensions))
+         (item (assoc wap
+                      (cl-case hea-fellow-dimension
+                        (:2011 hea-fellow-dimensions-2011)
+                        (:2023 hea-fellow-dimensions-2023))
+                      hea-fellow-dimensions))
          (definition (second item)))
       (message "%s: %s" wap definition))))
 
